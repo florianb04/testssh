@@ -1,0 +1,84 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dash Board{% endblock %}
+
+
+	{% block body %}
+
+		<div class="container-fluid">
+			<h1>Tableau de bord</h1>
+
+			<div class="row">
+
+				<div class="col">
+					<div class="card card-body bg-primary text-white text-center">
+						{{users}} utilisateurs
+					</div>
+
+				</div>
+
+				<div class="col">
+					<div class="card card-body bg-warning text-white text-center">
+						{{ads}} annonces
+					</div>
+
+				</div>
+
+				<div class="col">
+					<div class="card card-body bg-success text-white text-center">
+						{{bookings}} réservations
+					</div>
+				</div>
+
+				<div class="col">
+					<div class="card card-body bg-info text-white text-center">
+						{{comments}} avis
+					</div>
+				</div>
+
+
+			</div>	
+
+
+			<div class="row">
+				<div class="col alert alert-success mt-3">
+					<h2>Annonces populaires</h2>
+					<table class="table text-white">
+						<thead>
+							<tr>
+								<th scope="col">Annonce</th>
+								<th scope="col">Propriétaire</th>
+								<th scope="col">Moyenne</th>
+							</tr>
+						</thead>
+						<tbody>
+
+						{% for ad in bestAds %}
+							<tr>
+								<td>{{ad.title}}</td>
+								<td>{{ad.firstName}}</td>
+								<td>{{ad.note}}</td>
+							</tr>
+						{% endfor %}
+
+						</tbody>
+					</table>
+
+
+				</div>
+
+				<div class="col">
+
+				</div>
+
+
+			</div>
+
+
+
+
+		</div>
+
+
+
+	{% endblock %}	
