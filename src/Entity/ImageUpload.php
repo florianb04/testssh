@@ -2,16 +2,17 @@
 
 namespace App\Entity;
 
+use App\Repository\ImageUploadRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\ImageUploadRepository")
+ * @ORM\Entity(repositoryClass=ImageUploadRepository::class)
  */
 class ImageUpload
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -27,7 +28,7 @@ class ImageUpload
     private $url;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Ad", inversedBy="imageUploads")
+     * @ORM\ManyToOne(targetEntity=Ad::class, inversedBy="imageUploads")
      * @ORM\JoinColumn(nullable=false)
      */
     private $ad;

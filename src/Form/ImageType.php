@@ -14,7 +14,7 @@ class ImageType extends AbstractType
         $builder
             ->add('url')
             ->add('caption')
-          //  ->add('ad')
+            // ->add('ad')
         ;
     }
 

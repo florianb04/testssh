@@ -2,28 +2,31 @@
 
 namespace App\Entity;
 
+use App\Repository\ImageRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\ImageRepository")
+ * @ORM\Entity(repositoryClass=ImageRepository::class)
  */
 class Image
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\Url
-    * @Assert\Regex(pattern="#\.(jpg|gif|png)$#",
-    *    match=true, 
-    *   message="Url doit se terminer par .jpg ou .png ou .gif" 
-    *)
+     * 
+     *@Assert\Regex(
+     *     pattern="#\.(jpg|png|gif)$#",
+     *     match=true,
+     *     message="L'URL doit se terminer par JGP ou JPG ou GIF"
+     * )
+     * 
      */
     private $url;
 
@@ -33,7 +36,7 @@ class Image
     private $caption;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Ad", inversedBy="images")
+     * @ORM\ManyToOne(targetEntity=Ad::class, inversedBy="images")
      * @ORM\JoinColumn(nullable=false)
      */
     private $ad;

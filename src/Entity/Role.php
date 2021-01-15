@@ -2,18 +2,19 @@
 
 namespace App\Entity;
 
+use App\Repository\RoleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\RoleRepository")
+ * @ORM\Entity(repositoryClass=RoleRepository::class)
  */
 class Role
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -24,7 +25,7 @@ class Role
     private $title;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\User", inversedBy="roles")
+     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="userRoles")
      */
     private $users;
 

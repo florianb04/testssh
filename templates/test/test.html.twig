@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello TestController!{% endblock %}
+
+{% block body %}
+
+{% set toto = 'eric' %}
+
+	{% for prenom,age in tableau %}
+
+		{% if loop.last %}
+				<p><b>{{prenom}} a {{age}} ans </b></p>
+		{% else %}
+				<p>{{prenom}} a {{age}} ans </p>
+		{% endif %}
+
+	{% endfor %}
+
+{{toto | raw}}
+
+
+
+{% for compteur in 0..10 %}
+ 	<p>{{compteur}}</p>
+{% endfor %}
+
+
+{% endblock %}

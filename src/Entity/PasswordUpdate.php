@@ -2,28 +2,31 @@
 
 namespace App\Entity;
 
+use App\Repository\PasswordUpdateRepository;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * 
+ */
 class PasswordUpdate
 {
-  
+    /**
+     */
     private $id;
 
-   
+    /**
+     */
     private $oldPassword;
 
-     /**
-     * @Assert\Length(
-     *      min = 8,
-     *      minMessage = "Le mot de passe doit contenir au moins {{ limit }} caractères",
-     * )
+    /**
      */
     private $newPassword;
 
-      /**
-    * @Assert\EqualTo(propertyPath="newPassword",message="Les deux mots de passe ne sont pas identiques")
-    */
-    private $confirmPassword;
+    /**
+     * @Assert\EqualTo(propertyPath="newPassword",message="Les deux nouveaux mots de passes ne sont pas indentiques")
+     */
+    private $confirmNewPassword;
 
     public function getId(): ?int
     {
@@ -54,14 +57,14 @@ class PasswordUpdate
         return $this;
     }
 
-    public function getConfirmPassword(): ?string
+    public function getConfirmNewPassword(): ?string
     {
-        return $this->confirmPassword;
+        return $this->confirmNewPassword;
     }
 
-    public function setConfirmPassword(string $confirmPassword): self
+    public function setConfirmNewPassword(string $confirmNewPassword): self
     {
-        $this->confirmPassword = $confirmPassword;
+        $this->confirmNewPassword = $confirmNewPassword;
 
         return $this;
     }

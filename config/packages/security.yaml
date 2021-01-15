@@ -1,53 +1,53 @@
 security:
 
+
     encoders:
-        # use your user class name here
-        App\Entity\User:
-            # Use native password encoder
-            algorithm: auto
+            # use your user class name here
+            App\Entity\User:
+                # Use native password encoder
+                # This value auto-selects the best possible hashing algorithm
+                # (i.e. Sodium when available).
+                algorithm: auto
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-        in_memory: { memory: null }
-        in_database: # nom arbitraire 
-            entity: 
-                class: App\Entity\User # entité qui sert à voir ou sont les utilisateurs 
-                property: email # propriété de l'utilisateur qui permet de l'authentifier 
-
+        users_in_memory: { memory: null }
+        in_database:
+            entity:
+                # the class of the entity that represents users
+                class: 'App\Entity\User'
+                # the property to query by - e.g. username, email, etc
+                property: 'email'
 
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+
         admin:
             pattern: ^/admin
-            anonymous: true
-
+            anonymous: lazy
             provider: in_database
             form_login:
                 login_path: admin_account_login
                 check_path: admin_account_login
                 default_target_path: admin_ads_index
-
             logout:
                 path: admin_account_logout
-
-                target: homepage
-
+                target: homepage    
 
 
         main:
             anonymous: lazy
-
             provider: in_database
             form_login:
                 login_path: account_login
                 check_path: account_login
-                default_target_path: homepage
-
+                default_target_path: account_index
             logout:
                 path: account_logout
+                target: account_login
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
@@ -58,6 +58,6 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-         - { path: ^/admin/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }

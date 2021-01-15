@@ -2,35 +2,36 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Repository\AdRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
-use Symfony\Component\Validator\Constraints as Assert; 
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert; //à ajouté à la main
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\AdRepository")
-  * @ORM\HasLifecycleCallbacks 
+ * @ORM\Entity(repositoryClass=AdRepository::class)
+ * @ORM\HasLifecycleCallbacks 
  */
 class Ad
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     */
+    */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\Length(
-     *      min = 10,
+      * @Assert\Length(
+     *      min = 5,
      *      max = 50,
-     *      minMessage = "Your first name must be at least {{ limit }} characters long",
-     *      maxMessage = "Your first name cannot be longer than {{ limit }} characters"
+     *      minMessage = "Le titre doit faire un minimum de {{ limit }} caractéres",
+     *      maxMessage = "Le titre doit faire au maximum {{ limit }} caractéres",
+     *      allowEmptyString = false
      * )
      */
-     
     private $title;
 
     /**
@@ -54,13 +55,13 @@ class Ad
     private $content;
 
     /**
-    * @ORM\Column(type="string", length=255)
-    * @Assert\Url
-    * @Assert\Regex(pattern="#\.(jpg|gif|png)$#",
-    *    match=true, 
-    *   message="Url doit se terminer par .jpg ou .png ou .gif" 
-    *)
-    */
+     * @ORM\Column(type="string", length=255)
+     * @Assert\Regex(
+     *     pattern="#\.(jpg|png|gif)$#",
+     *     match=true,
+     *     message="le fichier doit se terminer par jpg, png ou gif"
+     * )
+     */
     private $coverImage;
 
     /**
@@ -69,56 +70,49 @@ class Ad
     private $rooms;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Image", mappedBy="ad", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Image::class, mappedBy="ad", orphanRemoval=true)
      * @Assert\Valid
      */
+    // @Assert\Valid à rajouter pour pouvoir faire les validations sur Image
     private $images;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\ImageUpload", mappedBy="ad", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=ImageUpload::class, mappedBy="ad", orphanRemoval=true)
      */
     private $imageUploads;
 
 
-// variable associée au fichier image
-  /** 
-     * @Assert\All({ 
-       * @Assert\File( 
-     *     maxSize = "1024k", 
-     * maxSizeMessage ="taille max 1Méga",
-     *     mimeTypes = {"image/jpeg","image/png"}, 
-     *     mimeTypesMessage = "Entrer un jpg ou jpeg ou png" 
-     * ) 
-     * }) 
-     */    
-public $file;
+    // fichier image
+    /**
+     * @Assert\All({
+     *    @Assert\File(
+     *         maxSize = "1024k",
+     *         maxSizeMessage = "Entrez une image de moins de 1024 ko",
+     *         mimeTypes = {"image/jpeg", "image/png"},
+     *         mimeTypesMessage = "Entrez une image .jpg OU .jpeg OU .png"
+     * )
+     * })
+     */
+    public $file;
 
-// tableau des id des images à effacer
-public $tableau_id;
 
-/**
- * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="ads")
- * @ORM\JoinColumn(nullable=false)
- */
-private $author;
 
-/**
- * @ORM\OneToMany(targetEntity="App\Entity\Booking", mappedBy="ad")
- */
-private $bookings;
+    //tableau_id
+    public $tableau_id;
 
-/**
- * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="ad", orphanRemoval=true)
- */
-private $comments;
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="ads")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $author;
+
 
     public function __construct()
     {
         $this->images = new ArrayCollection();
         $this->imageUploads = new ArrayCollection();
-        $this->bookings = new ArrayCollection();
-        $this->comments = new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
@@ -153,44 +147,6 @@ private $comments;
     {
         return $this->price;
     }
-
-
-// calcul de la moyenne des notes d'une annonce
-    public function getAvgRatings(){
-
-        //dump($this->comments);
-
-        $somme=0;
-        foreach ($this->comments as $comment) {
-           //dump($comment->getRating());
-            $somme=$somme + $comment-> getRating();
-
-        }
-
-        if (count($this->comments) > 0) return $somme/count($this->comments);
-        return 0;
-
-
-    }
-
-
-   //recupère le commentaire d'un auteur 
-    public function getCommentFromAuthor(User $author){
-
-        foreach ($this->comments as $comment) {
-           //dump($comment); 
-
-         if ($comment->getAuthor()===$author) return $comment;
-         return null;   
-
-
-        }
-        
-
-
-
-    }
-
 
     public function setPrice(float $price): self
     {
@@ -310,93 +266,29 @@ private $comments;
     }
 
 
-/** 
- * @ORM\PreRemove
-*/ 
-public function deleteUploadFiles(){ 
-  
+    /**
+     * permet de supprimer toutes les images du dossier Upload une fois l'anonnce supprimer
+     *  @ORM\PostRemove
+     */
+    public function deleteUploadFiles () {
 
-    foreach ($this->getImageUploads() as $imageUploadee) {
+        foreach ($this->getImageUploads() as $image) {
 
-         unlink($_SERVER['DOCUMENT_ROOT'].$imageUploadee->getUrl());
-    }
-
-  
-}
-
-public function getAuthor(): ?User
-{
-    return $this->author;
-}
-
-public function setAuthor(?User $author): self
-{
-    $this->author = $author;
-
-    return $this;
-}
-
-/**
- * @return Collection|Booking[]
- */
-public function getBookings(): Collection
-{
-    return $this->bookings;
-}
-
-public function addBooking(Booking $booking): self
-{
-    if (!$this->bookings->contains($booking)) {
-        $this->bookings[] = $booking;
-        $booking->setAd($this);
-    }
-
-    return $this;
-}
-
-public function removeBooking(Booking $booking): self
-{
-    if ($this->bookings->contains($booking)) {
-        $this->bookings->removeElement($booking);
-        // set the owning side to null (unless already changed)
-        if ($booking->getAd() === $this) {
-            $booking->setAd(null);
+            unlink($_SERVER['DOCUMENT_ROOT'].$image->getUrl());
+        
         }
     }
 
-    return $this;
-}
-
-/**
- * @return Collection|Comment[]
- */
-public function getComments(): Collection
-{
-    return $this->comments;
-}
-
-public function addComment(Comment $comment): self
-{
-    if (!$this->comments->contains($comment)) {
-        $this->comments[] = $comment;
-        $comment->setAd($this);
+    public function getAuthor(): ?User
+    {
+        return $this->author;
     }
 
-    return $this;
-}
+    public function setAuthor(?User $author): self
+    {
+        $this->author = $author;
 
-public function removeComment(Comment $comment): self
-{
-    if ($this->comments->contains($comment)) {
-        $this->comments->removeElement($comment);
-        // set the owning side to null (unless already changed)
-        if ($comment->getAd() === $this) {
-            $comment->setAd(null);
-        }
+        return $this;
     }
 
-    return $this;
-} 
-
-
-}
+}// Fin de la class Ad

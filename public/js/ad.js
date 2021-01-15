@@ -1,38 +1,38 @@
-var counter = $('#annonce_images .row').length; 
+var counter = $("#annonce_images .row").length;
 
-			$('#add_image').click(function(){
+$("#add_image").click(function(){
 
-		//const index = $('#annonce_images .row').length ;
-		//console.log(index);	
+    // récupére le prototype
+    var tmpl = $("#annonce_images").data("prototype");
 
-		counter = counter + 1;
-		//console.log(counter);
+    // incrémentation du nom des pototype a chaque clique
+    tmpl = tmpl.replace(/__name__/g,counter++)
 
-		var tmpl = $('#annonce_images').data('prototype');
-		//console.log(tmpl);	
+    // insére le prototype après le bloc avec un id #annonce_images
+    $("#annonce_images").append(tmpl);
 
-		tmpl = tmpl.replace(/__name__/g,counter);
-		//console.log(tmpl);
+    //console.log(tmpl);
 
-		$('#annonce_images').append(tmpl);
-
-		deleteBloc();
-
-	});
+    deleteBlock();
+    
+    });
 
 
-			function deleteBloc(){
+        function deleteBlock (){
 
-				$('.del_image').click(function(){
+            $('.del_image').click(function(){
+
+            var id = $(this).data("bloc");
+            
+            console.log(id);
+
+            $("#"+id).remove();
+            })
+
+        }
 
 
-					var bloc = $(this).data('bloc');	
-					console.log(bloc);	
+deleteBlock();
 
-					$('#' + bloc).remove();
 
-				})
 
-			}
-
-			deleteBloc();

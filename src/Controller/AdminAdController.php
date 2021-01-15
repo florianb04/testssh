@@ -2,154 +2,34 @@
 
 namespace App\Controller;
 
-use App\Entity\Ad;
-use App\Form\AnnonceType;
 use App\Repository\AdRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Validator\Constraints\Count;
 
 class AdminAdController extends AbstractController
 {
     /**
-     * @Route("/admin/ads/{page}", name="admin_ads_index" , requirements={"page":"[0-9]{1,}"})
+     * @Route("/admin/ads/{page}", name="admin_ads_index", requirements={"page"="[0-9]{1,}"} )
      */
-    public function index(AdRepository $repo, $page=1)
+    public function index(AdRepository $repo , $page=1)
     {
 
-      //dump($page);
-      $limit = 5;  // on veut 10 enregistrements
+        $limit = 5 ; //on veux 5 enregistrements par page
 
-      $start = ($page - 1) * $limit; // calcul de l'offset
+        $start = ($limit * $page) - $limit ; //calcul de l'offset
 
-      $total = count($repo->findAll()); // nbrs total d'enregistrements
-      //dump($total);
+        $total = count($repo->findAll()) ; // nombres total d'annonces
 
-      $pages=ceil($total/$limit); // arrondi a l'entier supérieur
-      //dump($pages);
-
-    	return $this->render('admin/ad/index.html.twig', [
-    		'ads'=>$repo->findBy([],[],$limit,$start),
-        'page'=>$page,
-        'pages'=>$pages
-    	]);
-    }
-
-
-
-      /**
-    * @Route("/admin/ads/{id}/edit", name="admin_ads_edit")
-    */
-      public function edit(EntityManagerInterface $manager,Request $request,Ad $ad)
-      {
-
-
-      	$form = $this -> createForm(AnnonceType::class,$ad);
-
-      	$form->handleRequest($request);
-
-      	if ($form ->isSubmitted() && $form->isValid()) 
-      	{   
-
-                // fonction d'upload d'images déportée dans Services
-                   // $upload->upload($ad,$manager);
-
-      		$tabid = $ad->tableau_id;
-      		$tabid = preg_replace("#^,#","",$tabid);
-
-      		$tabid = explode(',',$tabid);
-
-      		foreach ($tabid as $id) {
-
-      			foreach ($ad->getImageUploads() as $imageUploadee) {
-
-      				if ($id == $imageUploadee->getId())
-      				{
-
-
-      					$manager->remove($imageUploadee);
-      					$manager->flush();
-
-      					unlink($_SERVER['DOCUMENT_ROOT'].$imageUploadee->getUrl());
-
-
-
-      				}
-
-      			}
-
-
-
-      		}
-
-
-                // images venant de la collection de champs
-      		foreach ($ad->getImages() as $image) {
-      			$image->setAd($ad);
-      			$manager->persist($image);
-
-      		}
-
-      		$manager->persist($ad);
-      		$manager->flush();
-
-
-      		$this->addFlash(
-      			'success',
-      			"l'annonce {$ad->getTitle()} a été correctement modifiée"
-      		);
-
-      		return $this->redirectToRoute('admin_ads_index');
-
-
-      	} 
-
-
-
-      	return $this->render('admin/ad/edit.html.twig', [
-      		'form' => $form->createView(),
-      		'ad'=>$ad
-      	]);
-      }   
-
-
-
-        /**
-    * @Route("/admin/ads/{id}/delete", name="admin_ads_delete")
- */
-        public function delete(EntityManagerInterface $manager, Ad $ad)
-        {
+        $pages = ceil($total / $limit) ; //arrondi à l'entier supérieur pour le nbrs total de pages
 
         
-        	if (count($ad->getBookings()) == 0)
-        	{
-        		$manager->remove($ad);
-        		$manager->flush();
+        // $ads=$repo->findAll();// prend tous les enregistrements de la table visée.
 
-        		$this->addFlash(
-        			'success',
-        			"l'annonce a été supprimée"
-        		);
-
-        	}
-        	else
-        	{
-
-        		$this->addFlash(
-        			'warning',
-        			//"l'annonce {$ad->getTitle()} ne peut pas être supprimée car il y a des réservations en cours !"
-        			'l\'annonce '.$ad->getTitle().' ne peut pas être supprimée car il y a des réservations en cours !'
-        		);
-
-        	}	  
-
-        	return $this->redirectToRoute('admin_ads_index');
-
-
-        }
-
-
-
-
+        return $this->render('admin/ad/index.html.twig', [
+            'ads'=>$repo->findBy([],[],$limit,$start),
+            'page'=>$page,
+            'pages'=>$pages,
+        ]);
     }
+}

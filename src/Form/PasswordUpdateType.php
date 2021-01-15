@@ -14,7 +14,7 @@ class PasswordUpdateType extends AbstractType
         $builder
             ->add('oldPassword',PasswordType::class)
             ->add('newPassword',PasswordType::class)
-            ->add('confirmPassword',PasswordType::class)
+            ->add('confirmNewPassword',PasswordType::class)
         ;
     }
 

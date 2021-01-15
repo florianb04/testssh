@@ -2,26 +2,26 @@
 
 namespace App\Entity;
 
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
-
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
-* @UniqueEntity(
+ * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity(
  *     fields={"email"},
- *     message="cet email est déjà utilisé"
+ *     message="L' e-mail est déjà utilisé"
  * )
  */
 class User implements UserInterface
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -38,6 +38,9 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Email(
+     *     message = "The email '{{ value }}' is not a valid email.",
+     *    )
      */
     private $email;
 
@@ -48,23 +51,16 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\Length(
-     *      min = 8,
-     *      minMessage = "Le mot de passe doit contenir au moins {{ limit }} caractères",
-     * )
      */
-     
     private $hash;
 
-
-/*confirmation de mot de passe*/
     /**
-    * @Assert\EqualTo(propertyPath="hash",message="Les deux mots de passe ne sont pas identiques")
+    * @Assert\EqualTo(propertyPath="hash",message="Les deux mots de passes ne sont pas indentiques")
     */
     public $confirm_hash;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="text", nullable=true)
      */
     private $introduction;
 
@@ -79,31 +75,19 @@ class User implements UserInterface
     private $slug;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Ad", mappedBy="author")
+     * @ORM\OneToMany(targetEntity=Ad::class, mappedBy="author")
      */
     private $ads;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Role", mappedBy="users")
+     * @ORM\ManyToMany(targetEntity=Role::class, mappedBy="users")
      */
-    private $roles;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Booking", mappedBy="booker")
-     */
-    private $bookings;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="author", orphanRemoval=true)
-     */
-    private $comments;
+    private $userRoles;
 
     public function __construct()
     {
         $this->ads = new ArrayCollection();
-        $this->roles = new ArrayCollection();
-        $this->bookings = new ArrayCollection();
-        $this->comments = new ArrayCollection();
+        $this->userRoles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -176,7 +160,7 @@ class User implements UserInterface
         return $this->introduction;
     }
 
-    public function setIntroduction(string $introduction): self
+    public function setIntroduction(?string $introduction): self
     {
         $this->introduction = $introduction;
 
@@ -239,123 +223,91 @@ class User implements UserInterface
     }
 
 
+    // Implémentation du User interface
+    /**
+     * Returns the roles granted to the user.
+     *
+     * Alternatively, the roles might be stored on a ``roles`` property,
+     * and populated in any number of different ways when the user object
+     * is created.
+     *
+     * @return (Role|string)[] The user roles
+     */
+    public function getRoles() {
 
-    public function getRoles()
-         {
-            //dump($this->roles);
-            foreach ($this->roles as $role) {
-                //dump($role);
-                $roles[]=$role->getTitle();
-            }
-
-            $roles[]='ROLE_USER';
-             return $roles;
-         }
-
-
-public function getPassword(){
-
-    return $this->hash;
-
-}
-
-public function getSalt(){
-
-
-}
-
-
-public function getUsername() {
-
-    return $this->email;
-
-}
-
-public function eraseCredentials(){
-
-    
-}
-
-public function addRole(Role $role): self
-{
-    if (!$this->roles->contains($role)) {
-        $this->roles[] = $role;
-        $role->addUser($this);
-    }
-
-    return $this;
-}
-
-public function removeRole(Role $role): self
-{
-    if ($this->roles->contains($role)) {
-        $this->roles->removeElement($role);
-        $role->removeUser($this);
-    }
-
-    return $this;
-}
-
-/**
- * @return Collection|Booking[]
- */
-public function getBookings(): Collection
-{
-    return $this->bookings;
-}
-
-public function addBooking(Booking $booking): self
-{
-    if (!$this->bookings->contains($booking)) {
-        $this->bookings[] = $booking;
-        $booking->setBooker($this);
-    }
-
-    return $this;
-}
-
-public function removeBooking(Booking $booking): self
-{
-    if ($this->bookings->contains($booking)) {
-        $this->bookings->removeElement($booking);
-        // set the owning side to null (unless already changed)
-        if ($booking->getBooker() === $this) {
-            $booking->setBooker(null);
+        // add roles we gave to user ine $roles 
+        foreach ($this-> userRoles as $role ) {
+            $roles[]= $role->getTitle() ;
         }
+        
+        // add and give ROLE_USER to all users 
+        $roles[]='ROLE_USER' ;
+
+        // return all the roles we gave to user
+        return $roles;
     }
 
-    return $this;
-}
-
-/**
- * @return Collection|Comment[]
- */
-public function getComments(): Collection
-{
-    return $this->comments;
-}
-
-public function addComment(Comment $comment): self
-{
-    if (!$this->comments->contains($comment)) {
-        $this->comments[] = $comment;
-        $comment->setAuthor($this);
+    /**
+     * Returns the password used to authenticate the user.
+     *
+     * @return string|null The encoded password if any
+     */
+    public function getPassword(){
+        return $this->hash ;
     }
 
-    return $this;
-}
+    /**
+     * Returns the salt that was originally used to encode the password.
+     *
+     * This can return null if the password was not encoded using a salt.
+     *
+     * @return string|null The salt
+     */
+    public function getSalt() { } 
 
-public function removeComment(Comment $comment): self
-{
-    if ($this->comments->contains($comment)) {
-        $this->comments->removeElement($comment);
-        // set the owning side to null (unless already changed)
-        if ($comment->getAuthor() === $this) {
-            $comment->setAuthor(null);
+    /**
+     * Returns the username used to authenticate the user.
+     *
+     * @return string The username
+     */
+    public function getUsername() { 
+        return $this->email ;
+    }
+
+    /**
+     * Removes sensitive data from the user.
+     *
+     * This is important if, at any given point, sensitive information like
+     * the plain-text password is stored on this object.
+     */
+    public function eraseCredentials() { }
+
+    /**
+     * @return Collection|Role[]
+     */
+    public function getUserRoles(): Collection
+    {
+        return $this->userRoles;
+    }
+
+    public function addUserRole(Role $userRole): self
+    {
+        if (!$this->userRoles->contains($userRole)) {
+            $this->userRoles[] = $userRole;
+            $userRole->addUser($this);
         }
+
+        return $this;
     }
 
-    return $this;
-}
+    public function removeUserRole(Role $userRole): self
+    {
+        if ($this->userRoles->contains($userRole)) {
+            $this->userRoles->removeElement($userRole);
+            $userRole->removeUser($this);
+        }
 
-}
+        return $this;
+    }
+
+}// end of class User

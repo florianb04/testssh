@@ -1,25 +1,47 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello AdController!{% endblock %}
-
-	{% block body %}
-		<div class="container mt-3">
-	
-		<h1>Toutes les annonces</h1>
+{% block title %}Toutes les annonces{% endblock %}
 
 
-			<div class="row">
 
+{% block body %}
 
-			{% for ad in adss %}
-				
-					{% include ('ad/_ad.html.twig') %}
+	<div class="container mt-3" >
 
-				{% endfor %}
+		<h1> Toutes les annonces</h1>
 
+		<div class="row mb-4">
+
+		{% for ad in ads  %}
+		<div class="col-4 mt-4">
+			<div class="card text-center">
+				<div class="card-header">
+					{{ad.rooms}} chambres {{ad.price}}€/nuit<br>
+					Pas encore noté
 				</div>
+				<div class="card-body">
 
+					{% for img in ad.imageUploads %}
+						{% if loop.first %}
+							<img src="{{img.url}}" style=" height:200px;display:block;width:100%"/>
+						{% endif %}
+					{% endfor %}
 
-
+					<h5 class="card-title mt-2">{{ad.title}}</h5>
+					<p class="card-text">{{ad.introduction | striptags('<strong>') | raw}} </p>
+						<a href="{{path('ads_show',{'slug':ad.slug}) }}" class="btn btn-primary">En savoir plus</a>
+					</div>
 			</div>
-		{% endblock %}
+		</div>
+		{% endfor %}
+
+		</div>
+
+	</div>	
+
+{% endblock %}
+
+
+
+
+

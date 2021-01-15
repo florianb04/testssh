@@ -3,159 +3,115 @@
 namespace App\DataFixtures;
 
 use App\Entity\Ad;
-use App\Entity\Booking;
-use App\Entity\Comment;
-use App\Entity\Image;
 use App\Entity\Role;
 use App\Entity\User;
+use App\Entity\Image;
 use Cocur\Slugify\Slugify;
+use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-
-
-
 
 class AppFixtures extends Fixture
 {
 
-private $passwordEncoder;
+	private $passwordEncoder;
 
-
- public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->passwordEncoder = $passwordEncoder;
     }
 
 
+
     public function load(ObjectManager $manager)
     {
-        // $product = new Product();
-        // $manager->persist($product);
-            $adminRole=new Role();
-            $adminRole->setTitle('ROLE_ADMIN');
-            $manager->persist($adminRole);
+		
+		$adminRole = new Role() ;
+		$adminRole -> setTitle('ROLE_ADMIN');
+		$manager->persist($adminRole);
 
-            $adminUser=new User();
-            $adminUser ->setFirstName("Eric")
-                ->setLastName("Devolder")
-                ->setEmail("eric.devolder@ac-nice.fr")
-                ->setPicture("http://via.placeholder.com/64")
-                ->setIntroduction("je suis l'admin")
-                ->setDescription("c'est moi le chef")
-                ->setSlug("eric-devolder")
-                ->setHash($this->passwordEncoder->encodePassword(
-                   $adminUser,
-                    'password'
-                    ))
-                ->addRole($adminRole);
+		$adminUser = new User();
 
-              $manager->persist($adminUser);  
+		$adminUser->setFirstName("HackerMan")
+					->setLastName("Holy")
+					->setEmail("anon@god.com")
+					->setPicture("https://via.placeholder.com/64")
+					->setIntroduction("I am GOD")
+					->setDescription("I control everything here")
+					->setSlug("god")
+					// ici je lance ma focntion de cryptage de password
+					->setHash($this->passwordEncoder->encodePassword($adminUser,'password'))
+					->addUserRole($adminRole);
 
+		$manager->persist($adminUser);
 
+	    // User creation
+		for ($k=1; $k <=5 ; $k++) {
 
-		$slugify=new Slugify();
-		$titre='Titre ànnOnce n!:';
-		$slug = $slugify->slugify($titre);
+			$user = new User();
 
+			$user->setFirstName("prénom $k")
+					->setLastName("nom $k")
+					->setEmail("test$k@test.fr")
+					->setPicture("https://via.placeholder.com/64")
+					->setIntroduction("introduction $k")
+					->setDescription("description $k")
+					->setSlug("prenom$k-nom$k")
+					// ici je lance ma focntion de cryptage de password
+					->setHash($this->passwordEncoder->encodePassword($user,'password'));
 
-    for ($l=1; $l<=5;$l++){
+			$manager->persist($user);
+			$manager->flush();
 
-            $user = new User();
-            $user ->setFirstName("prenom$l")
-                ->setLastName("nom$l")
-                ->setEmail("test$l@test.fr")
-                ->setPicture("http://via.placeholder.com/64")
-                ->setIntroduction("introduction$l")
-                ->setDescription("description$l")
-                ->setSlug($slugify->slugify("prenom$l-nom$l"))
-                ->setHash($this->passwordEncoder->encodePassword(
-                   $user,
-                    'pass'
-                    ));
+			$slug2 =$user->getSlug().'-'.$user->getId();
+			$user->setSlug($slug2);
 
-                $manager->persist($user);
+			$manager->persist($user);
 
+			
+			// Ad creation
+			for ($i=0; $i <mt_rand(2,5) ; $i++) { 
 
-    	for ($i=1; $i <=mt_rand(1,5) ; $i++) { 
-    	
-    	$ad = new Ad();
+				$slugify=new Slugify();
+				$title="Titre de l'annonce n°: $i";
+				$slug=$slugify->slugify($title);
+				
+				$ad = new Ad();
+				$ad->setTitle("Titre de l'annonce n°: $i")
+					->setSlug($slug)
+					->setPrice(mt_rand(40,200))
+					->setIntroduction("introduction de <strong><i>l'annonce n°: $i</i></strong>")
+					->setContent("contenu de <strong>l'annonce n°: $i</strong>")
+					->setRooms(mt_rand(1,5))
+					->setCoverImage("https://via.placeholder.com/350")
+					->setAuthor($user);
+					
+				// images creation
+				for ($j=0; $j < mt_rand(1,4) ; $j++) { 
+					
+					$image = new Image();
+					$image->setUrl("https://via.placeholder.com/350");
+					$image->setCaption("légende de l'image $j");
+					$image->setAd($ad);
 
-    	$ad->setTitle("titre annonce $i")
-    		->setSlug($slug.$i)
-    		->setCoverImage('https://via.placeholder.com/350')
-    		->setIntroduction("<p>je suis l'introduction $i</p>")
-    		->setContent('<p>je suis le contenu'.$i.'</p>')
-    		->setPrice(mt_rand(40,200))
-    		->setRooms(mt_rand(1,5))
-            ->setAuthor($user);
+					$manager->persist($image);
+					}// end for image creation
 
-			    	for ($j=1; $j <= mt_rand(1,5)  ; $j++) 
-			    	{ 
-			    		$image= new Image();
+				$manager->persist($ad);
+				$manager->flush();
 
-			    		$image->setUrl('https://via.placeholder.com/350')
-			    		   		->setCaption('legende image'.$j)
-			    		   		->setAd($ad);
+				//dump($ad->getId());
+				$slug2 =$ad->getSlug().'_'.$ad->getId();
+				$ad->setSlug($slug2);
 
-			    		$manager->persist($image);   		
-
-			    	}	
-
-
-
-    		$manager->persist($ad);
-            $manager->flush();
-
-            $slug2 = $ad->getSlug().'_'.$ad->getId();
-            $ad->setSlug($slug2);
-            //dump($ad);
-
-
-            for ($k=1; $k <= mt_rand(1,5)  ; $k++) 
-                    { 
-
-                        $booking=new Booking();
-                        $booking->setCreatedAt(new \DateTime())
-                        ->setStartDate(new \DateTime("+ 5 days"))
-                        ->setEndDate(new \DateTime("+ 10 days"))
-                        ->setAmount($ad->getPrice()*5)
-                        ->setComment("Commentaire réservation $k")
-                        ->setBooker($user)
-                        ->setAd($ad);
-
-                     $manager->persist($booking);   
+				$manager->persist($ad);
+				$manager->flush();
 
 
-                 // ajout d'un commentaire ou non a la fin de la réservation   
-                     if (mt_rand(0,1))
-                     {
-                        $comment=new Comment();
-                        $comment->setCreatedAt(new \DateTime())
-                            -> setRating(mt_rand(0,5))
-                            ->setContent("commentaire fin de réservation N° $k")
-                            ->setAd($ad)
-                            ->setAuthor($user);
+			} // end for Ad creation
 
-                            $manager->persist($comment);
-
-                     }
-
-
-
-                    }
-
-
-
-			}
-
-
-
-
-
-        }
-
-        $manager->flush();
-
+		} // end for User creation
+		
+		//$manager->flush();
     }
 }

@@ -1,68 +1,78 @@
 {% extends 'base.html.twig' %}
 
+{# this form theme will be applied only to the form of this template #}
+
 {% form_theme form with ['bootstrap_4_layout.html.twig', _self] %}
 
-	{% block title %}Ajout d'une annonce{% endblock %}
 
-		{% block body %}
-
-			<div class="container mt-4">
-
-				<h1>Ajout d'une annonce</h1>
-				{{ form_start(form) }}
-
-
-				{{ form_row(form.title,{'label':'Titre','attr':{'placeholder':"Titre de l'annonce"}}) }}
+{% block title %}Création d'une nouvelle annonce{% endblock %}
 
 
 
-				{{ form_row(form.introduction) }}
+{% block body %}
 
-				{{ form_row(form.content) }}
+	<div class="container mt-3" >
 
-				{{ form_row(form.coverImage) }}
+		<h1>test creation</h1>
 
-				{{ form_row(form.rooms,{'attr':{'min':1}}) }}
+        {{ form_start (form) }}
 
+            {{ form_row (form.title,{'label':false, 'attr':{'placeholder':"Entrer le titre"} })   }}
+            
+            {{ form_row (form.coverImage,{'label':false, 'attr':{'placeholder':"Entrer une url (image)"} })   }}
 
-				{{ form_row(form.price) }}
+            {{ form_row (form.introduction,{'label':false, 'attr':{'placeholder':"Entrer l'introduction'"} })   }}
 
-				{# champ annonce_images qui sera sur-chargé #} 
-				{{ form_row(form.images) }} 
-				<button type="button" id="add_image" class="btn btn-success">Ajouter une image</button><br/><br/> 
+            {{ form_row (form.content,{'label':false, 'attr':{'placeholder':"Entrer le contenu"} })   }}
 
+            {{ form_row (form.rooms,{'label':false, 'attr':{'placeholder':"Entrer le nombre de chambres",'min':"1"} })   }}
 
-				{{ form_row(form.file) }} 
+            {{ form_row (form.price,{'label':false, 'attr':{'placeholder':"Entrer le tarif par nuit",} })   }}
 
-				<button type="submit" class="btn btn-primary">Créer l'annonce</button>
+            {{ form_row (form.images) }}
 
-				{{ form_end(form) }}
+            <button type="button" id="add_image" class="btn btn-success">Ajouter une image</button></br></br>
 
-			</div>
-		{% endblock %}
+            {{ form_row (form.file) }}
 
+            <button type="submit" class="btn btn-success">Créer une annonce</button>
 
-
-		{% block _annonce_images_entry_row %} 
-			
-			<div class="row" id="{{ id }}"> 
-				<div class="col"> 
-					{{ form_row(form.url, {'label':false,'attr':{'placeholder':"url de l'image"}}) }} 
-				</div> 
-				<div class="col"> 
-					{{ form_row(form.caption, {'label':false,'attr':{'placeholder':"description de l'image"}}) }} 
-				</div> 
-				<div class="col-2"> 
-					<button type="button"  class="btn btn-danger del_image" data-bloc="{{ id }}" >X</button> 
-				</div> 
-			</div> 
-			
-		{% endblock %} 
+        {{ form_end (form) }}
 
 
-		{% block javascripts %}
 
-			<script src="/js/ad.js"></script>
+    </div>
+
+{% endblock %}
 
 
-		{% endblock %}
+{# theme personaliser appeler en haut dans le _self #}
+{% block _annonce_images_entry_row %}
+
+
+<div class="row" id="{{id}}">
+
+    <div class="col">
+        {{form_row(form.url, {'label':false, 'attr':{'placeholder':"Entrer une image",} }    )}}
+    </div>
+
+    <div class="col">
+        {{form_row(form.caption, {'label':false, 'attr':{'placeholder':"Entrer une légende",} }    )}}
+    </div>
+
+    <div class="col-2">
+        <button type="button" class="btn btn-danger del_image"data-bloc="{{id}}"> X </button>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+
+{% block javascripts %}
+
+    <script type="text/javascript" src="/js/ad.js"></script>
+
+{% endblock %}

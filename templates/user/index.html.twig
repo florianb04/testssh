@@ -1,61 +1,82 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Page Utilisateur{% endblock %}
 
-	{% block body %}
+{% block title %}Mon compte{% endblock %}
 
-		<div class="container">
-			<h1>Profil de {{user.firstName}} {{user.lastName}}</h1>
+    {% block body %}
 
-			<div class="row">
-				<div class="col-3 text-align">
-					<img src="{{user.picture}}" class="mb-3"><br/>
-					<span class="badge badge-primary"> {{user.ads | length}} annonces</span>
+	<div class="container mt-3" >
 
-				</div>
-				<div class="col-9">
-					{% if (user is same as(app.user)) %}
-					<div >
-						<a href="{{path('account_profile')}}" class="btn btn-primary">Modifier mes informations</a>
-						<a href="{{path('account_password')}}" class="btn btn-primary">Modifier le mot de passe</a>
+		<h1>Le compte de {{user.firstName}} {{user.lastName}} </h1>
 
-					</div>
+        <div class="row">
+            <div class="col-3">
+                <img src="{{user.picture}}" style=""/>
+            </div>
 
-					{% endif %}
+            {% if (user is same as (app.user)) %}
+            
+                <a href="{{path('account_profile')}}" class="btn btn-primary mt-3 mb-3">Modifier mon compte</a>
+                <a href="{{path('account_password')}}" class="btn btn-primary mt-3 mb-3">Modifier le mot de passe</a>
 
-					{{user.description|raw}}
+            {% endif %} {# END if user is same as (app.user)  #}
+            
+            <div class="col-9">
+                <span class="badge badge-primary">{{user.ads | length}} annonce(s)</span>
+            </div>
+        </div>
 
-				</div>
+        <div class="row">
+            {{user.description}}
+        </div>
 
-			</div>
+        <h2> Toute les annonces de {{user.firstName}} {{user.lastName}} </h2>
+        
+        <div class="row">
+
+            {% if (user.ads | length > 0) %}
+
+                {% for ad in user.ads  %}
+                    <div class="col-4 mt-4">
+                        <div class="card text-center">
+                            <div class="card-header">
+                                {{ad.rooms}} chambres {{ad.price}}€/nuit<br>
+                                Pas encore noté
+                            </div>
+                            <div class="card-body">
+
+                                {% for img in ad.imageUploads %}
+                                    {% if loop.first %}
+                                        <img src="{{img.url}}" style=" height:200px;display:block;width:100%"/>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <h5 class="card-title mt-2">{{ad.title}}</h5>
+                                <p class="card-text">{{ad.introduction | striptags('<strong>') | raw}} </p>
+                                    <a href="{{path('ads_show',{'slug':ad.slug}) }}" class="btn btn-primary">En savoir plus</a>
+                                </div>
+                        </div>
+                    </div>
+                {% endfor %} {# END for ad in ads #}
+
+            {% else %}{# ELSE if (user.ads | length > 0) ELSE #}
+
+                <div class="row">
+                    <div class="alter alert-warning"> Il n'y a pas d'annonces </div>
+                </div>
+
+            {% endif %}{# END if (user.ads | length > 0) #}
+
+             
+        </div>
 
 
-			<h2>Les annonces de {{user.firstName}} {{user.lastName}} </h2>
-
-		{% if (user.ads | length) > 0 %}
-			<div class="row">
-
-				{% for ad in user.ads %}
-
-					{% include ('ad/_ad.html.twig') %}
-
-				{% endfor %}
-
-			</div>	
-		{% else %}	
-			<div class="row">
-				
-				<div class="alert alert-warning">Cet utilisateur n'a pas d'annonces</div>
-
-			</div>
-		{% endif %}
 
 
 
+    </div> {# END conatiner mt3 #}
 
 
-		</div>
+    {% endblock %}
 
 
-
-	{% endblock %}

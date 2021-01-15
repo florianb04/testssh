@@ -10,20 +10,20 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class RegistrationType extends AbstractType
+class ResgistrationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('firstName')
             ->add('lastName')
-            ->add('email',EmailType::class)
-            ->add('picture',UrlType::class)
-            ->add('hash',PasswordType::class)
-            ->add('confirm_hash',PasswordType::class)
+            ->add('email', EmailType::class)
+            ->add('picture', UrlType::class)
+            ->add('hash', PasswordType::class)
+            ->add('confirm_hash', PasswordType::class)
             ->add('introduction')
             ->add('description')
-           // ->add('slug')
+            // ->add('slug')
         ;
     }
 
